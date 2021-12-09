@@ -1,0 +1,38 @@
+def compilation(input_path, output_path):
+   #input_path and output_path are global path names 
+    path_name = input_path
+    cwd_name = os.path.abspath(path_name) 
+    directories = os.listdir(cwd_name)
+
+   #Change to path location of initial directory
+    os.chdir(path_name)
+
+    df = pd.DataFrame()
+
+    for directory in directories:
+   #Change from initial directory to sub directory
+        if not directory.startswith('.'):
+            pathwdir = path_name+'/'+directory
+            cwdwdir = os.path.abspath(pathwdir)
+            files = os.listdir(cwdwdir)
+        
+            for file in files:
+           #Change from sub directory to readable file   
+                if file.endswith('.xls'):
+                    fullpath = pathwdir+'/'+file
+                    Editedfile = pd.read_excel(fullpath)
+                  #Delete unnecessary rows, change for specifics of input dataset   
+                    Editedfile = Editedfile.drop([0,1,2,3,4,6,9])
+                  #Delete unnecessary columns, change for specifics of input dataset   
+                    Editedfile = Editedfile.drop(["Unnamed: 8"],axis=1)
+                  #Seperate file name to add desired columns
+                    sep=file.split('.')   
+                  #Add desired columns from file name, change for specifics of input dataset
+                    Editedfile['Irrig_Type']=sep[0] 
+                    Editedfile['Season']=sep[1]
+                    Editedfile['Zone']=sep[3]
+                    df = df.append(Editedfile, ignore_index=True) 
+
+   #Save appended file to desired path file
+    df.to_excel(output_path, engine='xlwt')
+    print(df.shape) #Check that appended dataframe shape is reasonable
